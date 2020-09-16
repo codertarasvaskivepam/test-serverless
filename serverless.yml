@@ -1,0 +1,77 @@
+service: test-serverless
+frameworkVersion: '2'
+
+table_name: "stockTable"
+
+provider:
+  name: aws
+  runtime: python3.8
+
+functions:
+  check_stock_value:
+    handler: handler.check_stock_value
+    environment:
+      DYNAMO:
+        Fn::GetAtt: [stockTable, Arn]
+      DYNAMODB_NAME: "{table_name}"
+  sell:
+    handler: handler.sell
+  buy:
+    handler: handler.buy
+
+stepFunctions:
+  stateMachines:
+    shop-workflow:
+      events:
+        - http:
+            path: shop
+            method: post
+      definition:
+        Comment: "A sample application"
+        StartAt: check_stock_value
+        States:
+          check_stock_value:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [check_stock_value, Arn]
+            Next: buy_or_sell
+          buy_or_sell:
+            Type: Choice
+            Choices:
+              - Variable: "$.stock_price"
+                NumericLessThanEquals: 50
+                Next: sell
+            Default: buy
+          sell:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [sell, Arn]
+            End: true
+          buy:
+            Type: Task
+            Resource:
+              Fn::GetAtt: [buy, Arn]
+            End: true
+
+resources:
+  Resources:
+    stockTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: stockTable
+        AttributeDefinitions:
+          - AttributeName: name
+            AttributeType: S
+          - AttributeName: datetime
+            AttributeType: S
+        KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+          - AttributeName: datetime
+            KeyType: RANGE
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+plugins:
+  - serverless-step-functions
