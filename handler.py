@@ -16,13 +16,16 @@ dynamodb = boto3.resource('dynamodb')
 
 
 def check_stock_value(event, context):
-    body = {
-        "stock_price": randint(0, 100),
-        "name": choice(goods),
-        "datetime": datetime.now().strftime("%d-%m-%Y"),
-    }
-    table = dynamodb.Table(os.environ.get('DYNAMODB_NAME', 'stockTable'))
-    table.put_item(Item=body)
+    try:
+        body = {
+            "stock_price": randint(0, 100),
+            "name": choice(goods),
+            "datetime": datetime.now().strftime("%d-%m-%Y"),
+        }
+        table = dynamodb.Table(os.environ.get('DYNAMODB_NAME', 'stockTable'))
+        table.put_item(Item=body)
+    except Exception as e:
+        print(f"Exception {str(e)}")
     print(body)
     return body
 
