@@ -1,6 +1,10 @@
 service: test-serverless
 frameworkVersion: '2'
 
+custom:
+  names:
+    dynamodb: "stockTable"
+    kinesis: "stockKinesis"
 
 provider:
   name: aws
@@ -13,7 +17,7 @@ functions:
     environment:
       DYNAMO:
         Fn::GetAtt: [stockTable, Arn]
-      DYNAMODB_NAME: ${opt:table_name}
+      DYNAMODB_NAME: ${self:custom.names.dynamodb}
   sell:
     handler: handler.sell
   buy:
@@ -26,6 +30,9 @@ stepFunctions:
         - http:
             path: shop
             method: post
+        - kinesis:
+            arn:
+            Fn::GetAtt: [KinesisStream, Arn]
       definition:
         Comment: "A sample application"
         StartAt: check_stock_value
@@ -106,6 +113,11 @@ resources:
                     - dynamodb:PutItem
                   Resource:
                     Fn::GetAtt: [stockTable, Arn]
+    KinesisStream:
+      Type: AWS::Kinesis::Stream
+      Properties:
+        Name: ${self:custom.names.kinesis}
+        ShardCount: 1
 
 
 plugins:

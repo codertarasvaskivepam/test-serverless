@@ -1,0 +1,25 @@
+CodeBuildProject:
+  Type: AWS::CodeBuild::Project
+  Properties:
+    Name: test-serverless
+    ServiceRole: test-serverless
+    Artifacts:
+      Type: NO_ARTIFACTS
+    Environment:
+      Type: LINUX_CONTAINER
+      ComputeType: BUILD_GENERAL1_SMALL
+      Image: aws/codebuild/standard:4.0
+    Source:
+      Type: GITHUB
+      Location: codertarasvaskivepam/test-serverless
+    Triggers:
+      Webhook: true
+      FilterGroups:
+        - - Type: EVENT
+            Pattern: PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED
+          - Type: BASE_REF
+            Pattern: ^refs/heads/master$
+            ExcludeMatchedPattern: false
+          - Type: ACTOR_ACCOUNT_ID
+            Pattern: 12345
+            ExcludeMatchedPattern: true

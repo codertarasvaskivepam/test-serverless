@@ -1,13 +1,11 @@
-import json
 import boto3
 import os
-
 
 from random import randint, choice
 from datetime import datetime
 
-course = (27, 28)
 
+course = (27, 28)
 goods = ['book', 'bike', 'car']
 
 
