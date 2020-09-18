@@ -1,25 +1,67 @@
-CodeBuildProject:
-  Type: AWS::CodeBuild::Project
-  Properties:
-    Name: test-serverless
-    ServiceRole: test-serverless
-    Artifacts:
-      Type: NO_ARTIFACTS
-    Environment:
-      Type: LINUX_CONTAINER
-      ComputeType: BUILD_GENERAL1_SMALL
-      Image: aws/codebuild/standard:4.0
-    Source:
-      Type: GITHUB
-      Location: codertarasvaskivepam/test-serverless
-    Triggers:
-      Webhook: true
-      FilterGroups:
-        - - Type: EVENT
-            Pattern: PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED
-          - Type: BASE_REF
-            Pattern: ^refs/heads/master$
-            ExcludeMatchedPattern: false
-          - Type: ACTOR_ACCOUNT_ID
-            Pattern: 12345
-            ExcludeMatchedPattern: true
+Parameters:
+  githubtoken:
+    Type: String
+
+Resources:
+  CodeBuildSourceCredential:
+    Type: AWS::CodeBuild::SourceCredential
+    Properties:
+      AuthType: PERSONAL_ACCESS_TOKEN
+      ServerType: GITHUB
+      Token:
+        Ref: githubtoken
+  CodeBuildProject:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: test-serverless
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        Type: NO_ARTIFACTS
+      Environment:
+        Type: LINUX_CONTAINER
+        ComputeType: BUILD_GENERAL1_SMALL
+        Image: aws/codebuild/standard:4.0
+      Source:
+        Type: GITHUB
+        Location: https://github.com/codertarasvaskivepam/test-serverless.git
+        GitCloneDepth: 1
+        Auth:
+          Resource: !Ref CodeBuildSourceCredential
+          Type: OAUTH
+      TimeoutInMinutes: 10
+      Triggers:
+        Webhook: true
+        FilterGroups:
+          - - Type: EVENT
+              Pattern: PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED,PULL_REQUEST_MERGED
+            - Type: BASE_REF
+              Pattern: ^refs/heads/master$
+              ExcludeMatchedPattern: false
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Action: [ 'sts:AssumeRole' ]
+            Effect: Allow
+            Principal:
+              Service: [ codebuild.amazonaws.com ]
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+        - PolicyName: CodeBuildAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Action:
+                  - 'logs:*'
+                  - 'ec2:CreateNetworkInterface'
+                  - 'ec2:DescribeNetworkInterfaces'
+                  - 'ec2:DeleteNetworkInterface'
+                  - 'ec2:DescribeSubnets'
+                  - 'ec2:DescribeSecurityGroups'
+                  - 'ec2:DescribeDhcpOptions'
+                  - 'ec2:DescribeVpcs'
+                  - 'ec2:CreateNetworkInterfacePermission'
+                Effect: Allow
+                Resource: '*'
