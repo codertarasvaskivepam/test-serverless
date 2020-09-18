@@ -10,10 +10,9 @@ phases:
       - pip3 install -r ./requirements.txt
       - flake8 .
       - pytest -sv tests
-      - cat /codebuild/output/tmp/script.sh
       - echo $CODEBUILD_WEBHOOK_EVENT;
       - |
-        if [ $CODEBUILD_WEBHOOK_EVENT == "PULL_REQUEST_MERGED" ]; then
+        if [ $CODEBUILD_WEBHOOK_EVENT = "PULL_REQUEST_MERGED" ]; then
           npm install -g serverless
           echo $CODEBUILD_GIT_BRANCH
         else
