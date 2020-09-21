@@ -7,6 +7,7 @@ from datetime import datetime
 
 course = (27, 28)
 goods = ['book', 'bike', 'car']
+tech = ['computer', 'laptop', 'mouse']
 
 
 # Get the service resource.
@@ -17,7 +18,7 @@ def check_stock_value(event, context):
     try:
         body = {
             "stock_price": randint(0, 100),
-            "name": choice(goods),
+            "name": choice(tech),
             "datetime": datetime.now().strftime("%d-%m-%Y"),
         }
         table = dynamodb.Table(os.environ.get('DYNAMODB_NAME', 'stockTable'))
