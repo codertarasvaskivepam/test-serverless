@@ -37,6 +37,9 @@ Resources:
             - Type: BASE_REF
               Pattern: ^refs/heads/master$
               ExcludeMatchedPattern: false
+            - Type: BASE_REF
+              Pattern: ^refs/heads/production$
+              ExcludeMatchedPattern: false
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
