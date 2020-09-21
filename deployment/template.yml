@@ -34,9 +34,6 @@ Resources:
         FilterGroups:
           - - Type: EVENT
               Pattern: PULL_REQUEST_CREATED,PULL_REQUEST_UPDATED,PULL_REQUEST_MERGED
-            - Type: BASE_REF
-              Pattern: ^refs/heads/master$
-              ExcludeMatchedPattern: false
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
