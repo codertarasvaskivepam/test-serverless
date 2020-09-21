@@ -65,6 +65,7 @@ Resources:
                   - 'ec2:CreateNetworkInterfacePermission'
                   - 'cloudformation:DescribeStacks'
                   - 'cloudformation:ValidateTemplate'
+                  - 'cloudformation:ListStackResources'
                   - 'cloudformation:CreateStack'
                   - 'cloudformation:DescribeStackEvents'
                   - 'cloudformation:DescribeStackResource'
