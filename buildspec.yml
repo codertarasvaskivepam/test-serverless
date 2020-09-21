@@ -7,6 +7,8 @@ phases:
   build:
     commands:
       - echo Build started on `date`
+      - export CODEBUILD_GIT_BRANCH=${CODEBUILD_WEBHOOK_BASE_REF##*/}
+      - echo $CODEBUILD_GIT_BRANCH
       - pip3 install -r ./requirements.txt
       - flake8 .
       - pytest -sv tests
@@ -14,7 +16,12 @@ phases:
       - |
         if [ $CODEBUILD_WEBHOOK_EVENT = "PULL_REQUEST_MERGED" ]; then
           npm install -g serverless
-          echo $CODEBUILD_GIT_BRANCH
+          npm install
+          if [ $CODEBUILD_GIT_BRANCH = "master" ]; then
+              serverless deploy --env stage2
+          elif [ $CODEBUILD_GIT_BRANCH = "production" ]; then
+              serverless deploy --env prod
+          fi;
         else
           echo 'taras'
         fi;
