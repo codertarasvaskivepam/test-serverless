@@ -30,3 +30,7 @@ pip install awscli
 ```bash
 aws cloudformation delete-stack --stack-name test-serverless
 ```
+#### set-up githubtoken
+```bash
+export githubtoken=your_token
+```
