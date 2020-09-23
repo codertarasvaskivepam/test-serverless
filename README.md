@@ -34,3 +34,5 @@ aws cloudformation delete-stack --stack-name test-serverless
 ```bash
 export githubtoken=your_token
 ```
+
+Also aws sns subscription is needed to confirm stage.
