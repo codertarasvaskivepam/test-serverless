@@ -120,6 +120,7 @@ Resources:
                   - 'logs:*'
                   - 's3:*'
                   - 'codebuild:*'
+                  - 'sns:*'
                 Effect: Allow
                 Resource: '*'
   CodePipelineBucket:
@@ -144,22 +145,9 @@ Resources:
                 - Name: SourceOutput
               Configuration:
                 Repo: !Sub ${gitrepo}
-                Branch: master
+                Branch: add_code_pipeline
                 Owner: codertarasvaskivepam
-                OAuthToken: "2838ad08ad501e9b9aea33a543f176d929c425a8"
-              RunOrder: 1
-        - Name: launch-tests
-          Actions:
-            - Name: run-tests
-              ActionTypeId:
-                Category: Build
-                Owner: AWS
-                Version: 1
-                Provider: CodeBuild
-              InputArtifacts:
-                - Name: SourceOutput
-              Configuration:
-                ProjectName: !Ref CodeBuildProject
+                OAuthToken: !Sub ${githubtoken}
               RunOrder: 1
         - Name: manual-approve
           Actions:
@@ -171,7 +159,24 @@ Resources:
                   Provider: Manual
                 Configuration:
                   NotificationArn: !Ref SNSTopic
+                  ExternalEntityLink: "http://example.com"
                 RunOrder: 1
+        - Name: launch-tests
+          Actions:
+              - Name: run-tests
+                ActionTypeId:
+                  Category: Build
+                  Owner: AWS
+                  Version: 1
+                  Provider: CodeBuild
+                InputArtifacts:
+                  - Name: SourceOutput
+                Configuration:
+                  ProjectName: !Ref CodeBuildProject
+                RunOrder: 1
+      DisableInboundStageTransitions:
+        - Reason: "Manual approve"
+          StageName: "launch-tests"
       ArtifactStore:
         Type: S3
         Location: !Ref CodePipelineBucket
