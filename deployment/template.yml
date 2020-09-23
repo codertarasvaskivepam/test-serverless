@@ -11,6 +11,10 @@ Parameters:
     Default: test-serverless
 
 Resources:
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: confirmationmessages
   CodeBuildSourceCredential:
     Type: AWS::CodeBuild::SourceCredential
     Properties:
@@ -165,6 +169,8 @@ Resources:
                   Owner: AWS
                   Version: 1
                   Provider: Manual
+                Configuration:
+                  NotificationArn: !Ref SNSTopic
                 RunOrder: 1
       ArtifactStore:
         Type: S3
